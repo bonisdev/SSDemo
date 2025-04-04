@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ShowShift Landing</title>
+  <style>
+    /* Global Resets/Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: sans-serif;
+    }
+
+    body {
+      background-color: #f5f5f5;
+      color: #333;
+    }
+
+    /* Sticky Header */
+    header {
+      position: sticky;
+      top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #202020;
+      padding: 0.5rem 1rem;
+      z-index: 1000;
+    }
+
+    /* Left: Logo */
+    .logo {
+      color: #fff;
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    /* Middle: Search Bar */
+    .search-bar-container {
+      flex: 1;
+      max-width: 500px;
+      margin: 0 1rem;
+      display: flex;
+    }
+
+    .search-bar-container input[type="text"] {
+      width: 100%;
+      padding: 0.5rem;
+      border: none;
+      border-radius: 2px 0 0 2px;
+      outline: none;
+    }
+
+    .search-bar-container button {
+      padding: 0.5rem 1rem;
+      border: none;
+      background-color: #ff5757;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 0 2px 2px 0;
+    }
+
+    /* Right: Profile Button (Now a circular sign-in button) */
+    .profile-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 50%;
+      background-color: #fff;
+      padding: 0;
+      cursor: pointer;
+      overflow: hidden;
+    }
+    .profile-btn img {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Main Content: Grid of Streams */
+    main {
+      max-width: 1200px;
+      margin: 1rem auto;
+      padding: 0 1rem;
+    }
+
+    .stream-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      grid-gap: 1rem;
+    }
+
+    .stream-card {
+      background-color: #fff;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .stream-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .stream-card img.preview {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .card-footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem;
+    }
+
+    .card-footer .left-info {
+      display: flex;
+      align-items: center;
+    }
+
+    .card-footer img.owner-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+      object-fit: cover;
+    }
+
+    .view-count {
+      font-size: 0.9rem;
+    }
+
+    /* Profile Modal (Pop-up) */
+    .modal {
+      display: none; /* hidden by default */
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      max-width: 800px;
+      background-color: #fff;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      z-index: 2000;
+      padding: 1rem;
+      border-radius: 4px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+    }
+
+    .close-modal-btn {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #333;
+    }
+
+    .modal-body {
+      margin-bottom: 1rem;
+    }
+
+    .modal-body .form-section {
+      margin: 1rem 0;
+    }
+
+    /* Basic example styling for form controls in the modal */
+    label {
+      display: inline-block;
+      margin-right: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    input[type="checkbox"] {
+      margin-right: 0.5rem;
+    }
+
+    .buy-tokens-btn {
+      background-color: #ff5757;
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border: none;
+      cursor: pointer;
+      border-radius: 2px;
+    }
+
+    /* Simple overlay behind the modal */
+    .modal-overlay {
+      display: none; /* hidden by default */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1999;
+    }
+
+    /* Responsive adjustments (optional) */
+    @media (max-width: 600px) {
+      .search-bar-container {
+        display: none; /* For smaller screens, maybe hide search or re-style */
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="logo">ShowShift</div>
+    
+    <div class="search-bar-container">
+      <input type="text" placeholder="Search streams..." />
+      <button type="button">Search</button>
+    </div>
+    
+    <!-- Circular Sign In button with an anonymous figure -->
+    <button class="profile-btn" id="profileBtn" title="Sign In">
+      <img src="https://via.placeholder.com/40?text=?" alt="Sign In" />
+    </button>
+  </header>
+
+  <!-- Main Content: Grid of Streams -->
+  <main>
+    <div class="stream-grid">
+      <!-- Example stream card 1 -->
+      <div class="stream-card">
+        <img class="preview" src="https://via.placeholder.com/400x225.png?text=Preview+GIF" alt="Stream Preview" />
+        <div class="card-footer">
+          <div class="left-info">
+            <img class="owner-logo" src="https://via.placeholder.com/50.png?text=Logo" alt="Owner Logo" />
+            <span>StreamerOne</span>
+          </div>
+          <span class="view-count">0 views</span>
+        </div>
+      </div>
+
+      <!-- Example stream card 2 -->
+      <div class="stream-card">
+        <img class="preview" src="https://via.placeholder.com/400x225.png?text=Preview+GIF" alt="Stream Preview" />
+        <div class="card-footer">
+          <div class="left-info">
+            <img class="owner-logo" src="https://via.placeholder.com/50.png?text=Logo" alt="Owner Logo" />
+            <span>StreamerTwo</span>
+          </div>
+          <span class="view-count">0 views</span>
+        </div>
+      </div>
+
+      <!-- Example stream card 3 -->
+      <div class="stream-card">
+        <img class="preview" src="https://via.placeholder.com/400x225.png?text=Preview+GIF" alt="Stream Preview" />
+        <div class="card-footer">
+          <div class="left-info">
+            <img class="owner-logo" src="https://via.placeholder.com/50.png?text=Logo" alt="Owner Logo" />
+            <span>StreamerThree</span>
+          </div>
+          <span class="view-count">0 views</span>
+        </div>
+      </div>
+
+      <!-- Additional stream cards -->
+      <div class="stream-card">
+        <img class="preview" src="https://via.placeholder.com/400x225.png?text=Preview+GIF" alt="Stream Preview" />
+        <div class="card-footer">
+          <div class="left-info">
+            <img class="owner-logo" src="https://via.placeholder.com/50.png?text=Logo" alt="Owner Logo" />
+            <span>StreamerFour</span>
+          </div>
+          <span class="view-count">0 views</span>
+        </div>
+      </div>
+      <div class="stream-card">
+        <img class="preview" src="https://via.placeholder.com/400x225.png?text=Preview+GIF" alt="Stream Preview" />
+        <div class="card-footer">
+          <div class="left-info">
+            <img class="owner-logo" src="https://via.placeholder.com/50.png?text=Logo" alt="Owner Logo" />
+            <span>StreamerFive</span>
+          </div>
+          <span class="view-count">0 views</span>
+        </div>
+      </div>
+      <div class="stream-card">
+        <img class="preview" src="https://via.placeholder.com/400x225.png?text=Preview+GIF" alt="Stream Preview" />
+        <div class="card-footer">
+          <div class="left-info">
+            <img class="owner-logo" src="https://via.placeholder.com/50.png?text=Logo" alt="Owner Logo" />
+            <span>StreamerSix</span>
+          </div>
+          <span class="view-count">0 views</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal Overlay -->
+  <div class="modal-overlay" id="modalOverlay"></div>
+
+  <!-- Profile Modal -->
+  <div class="modal" id="profileModal">
+    <div class="modal-header">
+      <h2>Your Profile</h2>
+      <button class="close-modal-btn" id="closeModalBtn">&times;</button>
+    </div>
+    <div class="modal-body">
+      <!-- Example content: checkboxes, profile image upload, buy tokens, etc. -->
+      <div class="form-section">
+        <label><input type="checkbox" /> Enable Dark Mode</label>
+        <label><input type="checkbox" /> Email Notifications</label>
+      </div>
+
+      <div class="form-section">
+        <label for="profileImageUpload">Profile Image:</label>
+        <input type="file" id="profileImageUpload" />
+      </div>
+
+      <div class="form-section">
+        <button class="buy-tokens-btn">Buy Tokens</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript for Modal Toggle and ESC Key -->
+  <script>
+    const profileBtn = document.getElementById('profileBtn');
+    const profileModal = document.getElementById('profileModal');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    // Show the modal
+    profileBtn.addEventListener('click', () => {
+      profileModal.style.display = 'block';
+      modalOverlay.style.display = 'block';
+    });
+
+    // Hide the modal
+    function closeModal() {
+      profileModal.style.display = 'none';
+      modalOverlay.style.display = 'none';
+    }
+
+    closeModalBtn.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', closeModal);
+
+    // Close with ESC key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+  </script>
+</body>
+</html>
